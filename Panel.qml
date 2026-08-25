@@ -188,25 +188,28 @@ Panel {
             + 'DEST="$HOME/.local/share/icons/0-active-theme"; '
             + 'rm -rf "$DEST" "$HOME/.icons/0-active-theme"; '
             + 'mkdir -p "$DEST/apps"; '
-            + 'if [ -d "/usr/share/icons/hicolor" ]; then '
-            + '  find /usr/share/icons/hicolor \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
-            + 'fi; '
-            + 'if [ -d "/usr/share/pixmaps" ]; then '
-            + '  find /usr/share/pixmaps -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
-            + 'fi; '
+            + 'for png in /usr/share/pixmaps/*.png; do '
+            + '  [ -f "$png" ] || continue; '
+            + '  name=$(basename "$png" .png); '
+            + '  b64=$(base64 -w0 "$png"); '
+            + '  printf "<svg xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\" width=\\"512\\" height=\\"512\\" viewBox=\\"0 0 512 512\\"><image width=\\"512\\" height=\\"512\\" xlink:href=\\"data:image/png;base64,%s\\"/></svg>\\n" "$b64" > "$DEST/apps/$name.svg"; '
+            + 'done; '
+            + 'for hdir in /usr/share/icons/hicolor/scalable/apps /usr/share/icons/hicolor/512x512/apps /usr/share/icons/hicolor/256x256/apps /usr/share/icons/hicolor/128x128/apps /usr/share/icons/hicolor/64x64/apps /usr/share/icons/hicolor/48x48/apps; do '
+            + '  if [ -d "$hdir" ]; then cp -as "$hdir"/* "$DEST/apps/" 2>/dev/null || true; fi; '
+            + 'done; '
             + 'PARENT="${THEME%%-*}"; '
-            + 'if [ -n "$PARENT" ] && [ "$PARENT" != "$THEME" ]; then '
-            + '  for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
-            + '    if [ -d "$b/$PARENT" ]; then '
-            + '      find "$b/$PARENT" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
-            + '    fi; '
-            + '  done; '
-            + 'fi; '
-            + 'for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
-            + '  if [ -d "$b/$THEME" ]; then '
-            + '    find "$b/$THEME" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
+            + 'for tdir in "$HOME/.local/share/icons/$THEME" "/usr/share/icons/$THEME" "$HOME/.local/share/icons/$PARENT" "/usr/share/icons/$PARENT"; do '
+            + '  if [ -d "$tdir" ]; then '
+            + '    for appdir in "$tdir/64x64/apps" "$tdir/scalable/apps" "$tdir/base/64x64/apps" "$tdir/base/128x128/apps" "$tdir/48x48/apps" "$tdir/128x128/apps" "$tdir/256x256/apps" "$tdir/apps" "$tdir"/*/apps "$tdir"/base/*/apps; do '
+            + '      if [ -d "$appdir" ]; then '
+            + '        cp -asf "$appdir"/* "$DEST/apps/" 2>/dev/null && break 2; '
+            + '      fi; '
+            + '    done; '
             + '  fi; '
-            + 'done'
+            + 'done; '
+            + 'if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '  cp -asf /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
+            + 'fi'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
@@ -283,11 +286,8 @@ Panel {
             root.applying = false
             root.applyingThemeName = ""
             if (exitCode === 0) {
-                root.statusMessage = "Theme applied!"
-                root.scanCurrentTheme()
-                if (root.bar && root.bar.shell && root.bar.shell.appLibrary && typeof root.bar.shell.appLibrary.refreshIcons === "function") {
-                    root.bar.shell.appLibrary.refreshIcons()
-                }
+                root.statusMessage = "Theme applied! Reloading…"
+                restartShellTimer.restart()
             } else {
                 root.statusMessage = "Apply failed"
                 root.scanCurrentTheme()
@@ -295,6 +295,14 @@ Panel {
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: applyStdout; waitForEnd: true }
+    }
+
+    property Timer restartShellTimer: Timer {
+        interval: 500
+        repeat: false
+        onTriggered: {
+            Quickshell.execDetached(["bash", "-c", "rm -rf \"$HOME/.cache/quickshell/qmlcache\" \"$HOME/.cache/quickshell\"/qtpipelinecache-*; omarchy-restart-shell"])
+        }
     }
 
     property Process installProcess: Process {
