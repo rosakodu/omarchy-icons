@@ -355,6 +355,23 @@ Panel {
                 if (t !== "") unique[t] = true
             }
             root.installedThemes = Object.keys(unique).sort()
+
+            // If current theme is no longer present on disk, safely apply best available fallback
+            if (root.currentTheme && root.currentTheme !== "" && root.installedThemes.length > 0 && root.installedThemes.indexOf(root.currentTheme) === -1) {
+                var fallback = "Adwaita"
+                if (root.installedThemes.indexOf("Tela-circle-manjaro") !== -1) {
+                    fallback = "Tela-circle-manjaro"
+                } else if (root.installedThemes.indexOf("Papirus") !== -1) {
+                    fallback = "Papirus"
+                } else if (root.installedThemes.indexOf("Yaru") !== -1) {
+                    fallback = "Yaru"
+                } else if (root.installedThemes.indexOf("Adwaita") !== -1) {
+                    fallback = "Adwaita"
+                } else if (root.installedThemes.length > 0) {
+                    fallback = root.installedThemes[0]
+                }
+                root.applyTheme(fallback)
+            }
         }
         stdout: StdioCollector { id: installedThemesStdout; waitForEnd: true }
     }
@@ -424,13 +441,6 @@ Panel {
             if (exitCode === 0) {
                 root.statusMessage = "Removed successfully"
                 root.refreshAll()
-                var currentStillExists = root.isThemeInstalled(root.currentTheme)
-                if (!currentStillExists) {
-                    var fallback = root.installedThemes.indexOf("Tela-circle-manjaro") !== -1
-                        ? "Tela-circle-manjaro"
-                        : (root.installedThemes.indexOf("Yaru") !== -1 ? "Yaru" : "Adwaita")
-                    root.applyTheme(fallback)
-                }
             } else {
                 var err = String(removeStderr.text || removeStdout.text || "Remove failed").trim().split("\n")[0]
                 root.statusMessage = err.length > 0 ? err : "Remove failed"
