@@ -312,7 +312,9 @@ Panel {
         root.operatingPackage = packageName
         root.statusMessage = "Installing " + packageName + "…"
         var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
-        installProcess.command = ["pkexec", "bash", "-c", "pacman -S --noconfirm --needed " + pkgs + " 2>&1"]
+        var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
+            + 'pacman -S --noconfirm --needed ' + pkgs + ' 2>&1'
+        installProcess.command = ["pkexec", "bash", "-c", cmd]
         installProcess.running = true
     }
 
@@ -322,7 +324,9 @@ Panel {
         root.operatingPackage = packageName
         root.statusMessage = "Removing " + packageName + "…"
         var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
-        removeProcess.command = ["pkexec", "bash", "-c", "pacman -Rns --noconfirm " + pkgs + " 2>&1 || pacman -R --noconfirm " + pkgs + " 2>&1"]
+        var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
+            + 'pacman -Rns --noconfirm ' + pkgs + ' 2>&1 || pacman -R --noconfirm ' + pkgs + ' 2>&1'
+        removeProcess.command = ["pkexec", "bash", "-c", cmd]
         removeProcess.running = true
     }
 
