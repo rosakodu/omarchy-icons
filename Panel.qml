@@ -90,7 +90,7 @@ Panel {
         "elementary-icon-theme",
         "deepin-icon-theme",
         "mate-icon-theme-faenza",
-        "oxygen-icons-svg"
+        "oxygen-icons"
     ]
 
     function isAllowedPackage(pkg) {
@@ -192,11 +192,9 @@ Panel {
             + 'PARENT="${THEME%%-*}"; '
             + 'for tdir in "$HOME/.local/share/icons/$THEME" "/usr/share/icons/$THEME" "$HOME/.local/share/icons/$PARENT" "/usr/share/icons/$PARENT"; do '
             + '  if [ -d "$tdir" ]; then '
-            + '    for s in 64x64 scalable 48x48 32x32 128x128 apps; do '
-            + '      if [ -d "$tdir/$s/apps" ]; then '
-            + '        cp -as "$tdir/$s/apps" "$DEST/apps" 2>/dev/null && break 2; '
-            + '      elif [ -d "$tdir/$s" ] && [ "$s" = "apps" ]; then '
-            + '        cp -as "$tdir/$s" "$DEST/apps" 2>/dev/null && break 2; '
+            + '    for appdir in "$tdir/64x64/apps" "$tdir/scalable/apps" "$tdir/base/64x64/apps" "$tdir/base/128x128/apps" "$tdir/48x48/apps" "$tdir/128x128/apps" "$tdir/apps" "$tdir"/*/apps "$tdir"/base/*/apps; do '
+            + '      if [ -d "$appdir" ]; then '
+            + '        cp -as "$appdir" "$DEST/apps" 2>/dev/null && break 2; '
             + '      fi; '
             + '    done; '
             + '  fi; '

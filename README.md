@@ -44,7 +44,7 @@ The widget will appear in the bar. Click it to open the icon theme panel.
 | Obsidian | `obsidian-icon-theme` | Obsidian |
 | Cosmic | `cosmic-icon-theme` | Cosmic |
 | Elementary | `elementary-icon-theme` | elementary |
-| Oxygen | `oxygen-icons-svg` | Oxygen |
+| Oxygen | `oxygen-icons` | Oxygen |
 | Yaru | pre-installed | 20 color/dark variants |
 | Adwaita | pre-installed | Adwaita |
 | Breeze | pre-installed | Breeze, Breeze-dark |

@@ -114,8 +114,8 @@ var catalog = [
     },
     {
         name: "Oxygen",
-        package: "oxygen-icons-svg",
-        description: "Classic detailed KDE Oxygen vector icon theme",
+        package: "oxygen-icons",
+        description: "Classic detailed KDE Oxygen icon theme",
         variants: [
             { name: "Oxygen", theme: "oxygen", mode: "auto" }
         ]
