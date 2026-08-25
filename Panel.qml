@@ -192,13 +192,13 @@ Panel {
             + 'if [ -n "$PARENT" ] && [ "$PARENT" != "$THEME" ]; then '
             + '  for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
             + '    if [ -d "$b/$PARENT" ]; then '
-            + '      find "$b/$PARENT" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf {} "$DEST/apps/" \\; 2>/dev/null || true; '
+            + '      find "$b/$PARENT" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
             + '    fi; '
             + '  done; '
             + 'fi; '
             + 'for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
             + '  if [ -d "$b/$THEME" ]; then '
-            + '    find "$b/$THEME" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf {} "$DEST/apps/" \\; 2>/dev/null || true; '
+            + '    find "$b/$THEME" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf -t "$DEST/apps/" {} + 2>/dev/null || true; '
             + '  fi; '
             + 'done'
         applyProcess.command = ["bash", "-c", script, themeName]
@@ -277,11 +277,11 @@ Panel {
             root.applying = false
             root.applyingThemeName = ""
             if (exitCode === 0) {
-                root.statusMessage = "Theme applied! Reloading…"
+                root.statusMessage = "Theme applied!"
+                root.scanCurrentTheme()
                 if (root.bar && root.bar.shell && root.bar.shell.appLibrary && typeof root.bar.shell.appLibrary.refreshIcons === "function") {
                     root.bar.shell.appLibrary.refreshIcons()
                 }
-                restartShellTimer.restart()
             } else {
                 root.statusMessage = "Apply failed"
                 root.scanCurrentTheme()
@@ -289,14 +289,6 @@ Panel {
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: applyStdout; waitForEnd: true }
-    }
-
-    property Timer restartShellTimer: Timer {
-        interval: 350
-        repeat: false
-        onTriggered: {
-            Quickshell.execDetached(["bash", "-c", "rm -rf \"$HOME/.cache/quickshell/qmlcache\" \"$HOME/.cache/quickshell\"/qtpipelinecache-*; omarchy-restart-shell"])
-        }
     }
 
     property Process installProcess: Process {
