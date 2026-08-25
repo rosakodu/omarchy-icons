@@ -393,10 +393,7 @@ Panel {
         root.resetToAdwaitaOnRemove = isCurrent
         root.installing = true
         root.operatingPackage = packageName
-        root.statusMessage = isCurrent ? "Reverting to Adwaita & removing " + packageName + "…" : "Removing " + packageName + "…"
-        if (isCurrent) {
-            root.currentTheme = "Adwaita"
-        }
+        root.statusMessage = isCurrent ? "Removing " + packageName + " & switching theme…" : "Removing " + packageName + "…"
         var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
             + 'pkgs=("$0"); '
             + 'if [ "$0" = "tela-circle-icon-theme-all" ]; then '
@@ -521,19 +518,15 @@ Panel {
 
             if (exitCode === 0) {
                 root.statusMessage = needAdwaita ? "Removed. Reverted to Adwaita." : "Removed successfully"
+                root.refreshAll()
                 if (needAdwaita) {
                     root.applyTheme("Adwaita")
-                } else {
-                    root.refreshAll()
                 }
             } else {
                 var err = String(removeStderr.text || removeStdout.text || "Remove failed").trim().split("\n")[0]
                 root.statusMessage = err.length > 0 ? err : "Remove failed"
-                if (needAdwaita) {
-                    root.applyTheme("Adwaita")
-                } else {
-                    root.refreshAll()
-                }
+                root.refreshAll()
+                root.scanCurrentTheme()
             }
             statusClearTimer.restart()
         }
