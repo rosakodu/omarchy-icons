@@ -2,6 +2,8 @@
 
 A modern, highly polished, and fully native icon theme manager and status bar widget for **Omarchy Quattro** (Hyprland + Quickshell), featuring a curated theme catalog, instant one-click pacman installation, live variant selection, real-time search, and seamless GTK & Omarchy theme synchronization.
 
+![Omarchy Icons Preview](./preview.png)
+
 ---
 
 ## ✨ Features
