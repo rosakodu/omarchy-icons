@@ -264,8 +264,7 @@ Panel {
             root.applying = false
             root.applyingThemeName = ""
             if (exitCode === 0) {
-                root.statusMessage = "Theme applied! Reloading…"
-                restartShellTimer.restart()
+                root.statusMessage = "Theme applied"
             } else {
                 root.statusMessage = "Apply failed"
                 root.scanCurrentTheme()
@@ -273,14 +272,6 @@ Panel {
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: applyStdout; waitForEnd: true }
-    }
-
-    property Timer restartShellTimer: Timer {
-        interval: 500
-        repeat: false
-        onTriggered: {
-            Quickshell.execDetached(["bash", "-c", "rm -rf \"$HOME/.cache/quickshell/qmlcache\" \"$HOME/.cache/quickshell\"/qtpipelinecache-*; omarchy-restart-shell"])
-        }
     }
 
     property Process installProcess: Process {
