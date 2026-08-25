@@ -310,7 +310,7 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Removing " + packageName + "…"
-        removeProcess.command = ["pkexec", "pacman", "-R", "--noconfirm", packageName]
+        removeProcess.command = ["pkexec", "bash", "-c", "pacman -Rns --noconfirm \"$0\" 2>&1 || pacman -R --noconfirm \"$0\" 2>&1", packageName]
         removeProcess.running = true
     }
 
@@ -392,15 +392,14 @@ Panel {
             if (exitCode === 0) {
                 root.statusMessage = "Installed successfully"
                 root.refreshAll()
-                if (root.currentTheme && root.currentTheme.length > 0) {
-                    root.applyTheme(root.currentTheme)
-                }
             } else {
-                root.statusMessage = "Install failed"
+                var err = String(installStderr.text || installStdout.text || "Install failed").trim().split("\n")[0]
+                root.statusMessage = err.length > 0 ? err : "Install failed"
             }
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: installStdout; waitForEnd: true }
+        stderr: StdioCollector { id: installStderr; waitForEnd: true }
     }
 
     property Process removeProcess: Process {
@@ -410,12 +409,22 @@ Panel {
             if (exitCode === 0) {
                 root.statusMessage = "Removed successfully"
                 root.refreshAll()
+                var currentStillExists = root.isThemeInstalled(root.currentTheme)
+                if (!currentStillExists) {
+                    var fallback = root.installedThemes.indexOf("Tela-circle-manjaro") !== -1
+                        ? "Tela-circle-manjaro"
+                        : (root.installedThemes.indexOf("Yaru") !== -1 ? "Yaru" : "Adwaita")
+                    root.applyTheme(fallback)
+                }
             } else {
-                root.statusMessage = "Remove failed"
+                var err = String(removeStderr.text || removeStdout.text || "Remove failed").trim().split("\n")[0]
+                root.statusMessage = err.length > 0 ? err : "Remove failed"
+                root.refreshAll()
             }
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: removeStdout; waitForEnd: true }
+        stderr: StdioCollector { id: removeStderr; waitForEnd: true }
     }
 
     property Timer statusClearTimer: Timer {
