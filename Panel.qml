@@ -178,7 +178,24 @@ Panel {
         }
         root.applying = true
         root.statusMessage = "Applying " + themeName + "…"
-        applyProcess.command = ["gsettings", "set", "org.gnome.desktop.interface", "icon-theme", themeName]
+        var script = 'THEME="$0"; '
+            + 'gsettings set org.gnome.desktop.interface icon-theme "$THEME"; '
+            + 'mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"; '
+            + 'for f in "$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"; do '
+            + '  if [ -f "$f" ]; then '
+            + '    if grep -q "gtk-icon-theme-name" "$f"; then '
+            + '      sed -i "s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$THEME/" "$f"; '
+            + '    else '
+            + '      echo "gtk-icon-theme-name=$THEME" >> "$f"; '
+            + '    fi '
+            + '  else '
+            + '    printf "[Settings]\\ngtk-icon-theme-name=%%s\\n" "$THEME" > "$f"; '
+            + '  fi; '
+            + 'done; '
+            + 'if [ -d "$HOME/.local/state/omarchy/current/theme" ]; then '
+            + '  echo "$THEME" > "$HOME/.local/state/omarchy/current/theme/icons.theme" 2>/dev/null || true; '
+            + 'fi'
+        applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
 
