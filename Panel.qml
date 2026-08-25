@@ -185,7 +185,22 @@ Panel {
             + '    sed -i -E \'s/^icon_theme=.*/icon_theme=\'"$THEME"\'/\' "$qfile" 2>/dev/null || true; '
             + '  fi; '
             + 'done; '
-            + 'rm -rf "$HOME/.local/share/icons/0-active-theme" "$HOME/.icons/0-active-theme"'
+            + 'DEST="$HOME/.local/share/icons/0-active-theme"; '
+            + 'rm -rf "$DEST" "$HOME/.icons/0-active-theme"; '
+            + 'mkdir -p "$DEST/apps"; '
+            + 'PARENT="${THEME%%-*}"; '
+            + 'if [ -n "$PARENT" ] && [ "$PARENT" != "$THEME" ]; then '
+            + '  for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
+            + '    if [ -d "$b/$PARENT" ]; then '
+            + '      find "$b/$PARENT" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf {} "$DEST/apps/" \\; 2>/dev/null || true; '
+            + '    fi; '
+            + '  done; '
+            + 'fi; '
+            + 'for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
+            + '  if [ -d "$b/$THEME" ]; then '
+            + '    find "$b/$THEME" \\( -path "*/apps/*" -o -path "*/applications/*" \\) \\( -name "*.svg" -o -name "*.png" \\) -exec ln -sf {} "$DEST/apps/" \\; 2>/dev/null || true; '
+            + '  fi; '
+            + 'done'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
