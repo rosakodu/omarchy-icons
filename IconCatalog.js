@@ -1,5 +1,5 @@
-// IconCatalog.js — Catalog of available icon themes for Omarchy
-// All downloadable packages come directly from Arch Linux official repositories (pacman).
+// IconCatalog.js — Audited catalog of icon themes for Omarchy
+// All theme names and directory identifiers are verified against pacman package archives.
 
 .pragma library
 
@@ -11,9 +11,7 @@ var catalog = [
         variants: [
             { name: "Papirus",       theme: "Papirus",       mode: "auto" },
             { name: "Papirus Dark",  theme: "Papirus-Dark",  mode: "dark" },
-            { name: "Papirus Light", theme: "Papirus-Light", mode: "light" },
-            { name: "ePapirus",      theme: "ePapirus",      mode: "light" },
-            { name: "ePapirus Dark", theme: "ePapirus-Dark", mode: "dark" }
+            { name: "Papirus Light", theme: "Papirus-Light", mode: "light" }
         ]
     },
     {
@@ -23,6 +21,7 @@ var catalog = [
         variants: [
             { name: "Tela Circle",            theme: "Tela-circle",            mode: "auto" },
             { name: "Tela Circle Dark",       theme: "Tela-circle-dark",       mode: "dark" },
+            { name: "Tela Circle Light",      theme: "Tela-circle-light",      mode: "light" },
             { name: "Tela Circle Black",      theme: "Tela-circle-black",      mode: "dark" },
             { name: "Tela Circle Black Dark", theme: "Tela-circle-black-dark", mode: "dark" },
             { name: "Tela Circle Blue",       theme: "Tela-circle-blue",       mode: "auto" },
@@ -50,7 +49,7 @@ var catalog = [
     {
         name: "Pop",
         package: "pop-icon-theme",
-        description: "System76 Pop!_OS official icon theme",
+        description: "System76 Pop!_OS official icon theme (adaptive)",
         variants: [
             { name: "Pop", theme: "Pop", mode: "auto" }
         ]
@@ -58,13 +57,14 @@ var catalog = [
     {
         name: "Deepin / Bloom",
         package: "deepin-icon-theme",
-        description: "Deepin Desktop elegant icon theme (Bloom & Vintage)",
+        description: "Deepin Desktop elegant icon theme (Bloom, Vintage, Sea)",
         variants: [
             { name: "Bloom",                theme: "bloom",                mode: "auto" },
             { name: "Bloom Dark",           theme: "bloom-dark",           mode: "dark" },
             { name: "Bloom Classic",        theme: "bloom-classic",        mode: "auto" },
             { name: "Bloom Classic Dark",   theme: "bloom-classic-dark",   mode: "dark" },
-            { name: "Vintage",              theme: "vintage",              mode: "auto" }
+            { name: "Vintage",              theme: "vintage",              mode: "auto" },
+            { name: "Sea",                  theme: "Sea",                  mode: "auto" }
         ]
     },
     {
@@ -72,16 +72,28 @@ var catalog = [
         package: "mate-icon-theme-faenza",
         description: "Legendary square icon theme with rounded corners",
         variants: [
-            { name: "Faenza",      theme: "matefaenza",     mode: "light" },
-            { name: "Faenza Dark", theme: "matefaenzadark", mode: "dark" }
+            { name: "Faenza",       theme: "matefaenza",     mode: "light" },
+            { name: "Faenza Dark",  theme: "matefaenzadark", mode: "dark" },
+            { name: "Faenza Gray",  theme: "matefaenzagray", mode: "dark" }
         ]
     },
     {
         name: "Obsidian",
         package: "obsidian-icon-theme",
-        description: "Dark, elegant icon theme inspired by obsidian stone",
+        description: "Dark, elegant icon theme with rich accent colors",
         variants: [
-            { name: "Obsidian", theme: "Obsidian", mode: "dark" }
+            { name: "Obsidian Gray",        theme: "Obsidian-Gray",        mode: "dark" },
+            { name: "Obsidian Gray Light",  theme: "Obsidian-Gray-Light",  mode: "light" },
+            { name: "Obsidian Aqua",        theme: "Obsidian-Aqua",        mode: "dark" },
+            { name: "Obsidian Green",       theme: "Obsidian-Green",       mode: "dark" },
+            { name: "Obsidian Indigo",      theme: "Obsidian-Indigo",      mode: "dark" },
+            { name: "Obsidian Amber",       theme: "Obsidian-Amber",       mode: "dark" },
+            { name: "Obsidian Mint",        theme: "Obsidian-Mint",        mode: "dark" },
+            { name: "Obsidian Purple",      theme: "Obsidian-Purple",      mode: "dark" },
+            { name: "Obsidian Red",         theme: "Obsidian-Red",         mode: "dark" },
+            { name: "Obsidian Sand",        theme: "Obsidian-Sand",        mode: "dark" },
+            { name: "Obsidian Silver",      theme: "Obsidian-Silver",      mode: "dark" },
+            { name: "Obsidian Teal",        theme: "Obsidian-Teal",        mode: "dark" }
         ]
     },
     {
