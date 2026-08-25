@@ -32,7 +32,7 @@ omarchy-icons/
 ## 3. Architecture & Icon Subsystem Details
 
 ### The 5-Point Theme Synchronization
-When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` runs a shell script that synchronizes the theme across all subsystem layers:
+When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` runs a fast shell script that synchronizes the theme across all subsystem layers:
 
 1. **GNOME / Wayland Settings:**
    ```bash
@@ -45,26 +45,19 @@ When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` run
 3. **Freedesktop / Qt Default Theme Inheritance:**
    Writes `[Icon Theme]\nInherits=$THEME` into:
    - `~/.icons/default/index.theme`
-4. **Omarchy Menu (`AppLibrary`) Priority Symlinks:**
-   Omarchy's `AppLibrary.qml` scans `$HOME/.local/share/icons` *before* `/usr/share/icons`.
-   The script creates:
-   ```bash
-   DEST="$HOME/.local/share/icons/0-active-theme"
-   rm -rf "$DEST"
-   mkdir -p "$DEST"
-   # Finds the theme's apps directory and creates shadow symlinks:
-   cp -as "$tdir/$s/apps" "$DEST/apps"
-   ```
-   This ensures that all apps in the Omarchy Menu (`Super` → **Apps** / Search) immediately display the active theme's icons.
+4. **Omarchy Menu (`AppLibrary`) & Dock Priority Bridge:**
+   Omarchy's `AppLibrary.qml` and the Dock scan `$HOME/.icons` and `$HOME/.local/share/icons`. Placing a clean shadow link directory in `~/.local/share/icons/0-active-theme/apps/` and `~/.icons/0-active-theme/apps/` guarantees that both the Omarchy launcher (`Super` → **Apps** / Search) and Dock immediately display the active theme's icons ahead of any other icon sets (e.g. Zafiro).
 5. **Omarchy Desktop Theme Hook:**
    Writes `$THEME` to `~/.local/state/omarchy/current/theme/icons.theme` if present.
 
-### Shell Reload on Apply
-Upon exit code 0 of `applyProcess`, a timer triggers:
-```bash
-rm -rf "$HOME/.cache/quickshell/qmlcache" "$HOME/.cache/quickshell"/qtpipelinecache-*
-omarchy-restart-shell
-```
+### Shell Reload & Icon Refresh on Apply
+Upon exit code 0 of `applyProcess`, the plugin:
+1. Calls `root.bar.shell.appLibrary.refreshIcons()` to re-index application icons.
+2. Triggers a shell reload timer:
+   ```bash
+   rm -rf "$HOME/.cache/quickshell/qmlcache" "$HOME/.cache/quickshell"/qtpipelinecache-*
+   omarchy-restart-shell
+   ```
 
 ---
 

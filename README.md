@@ -1,62 +1,80 @@
-# Icon Theme Switcher for Omarchy
+# Omarchy Icons
 
-Browse, download, and apply GTK icon themes directly from the Omarchy bar.
+A modern, highly polished, and fully native icon theme manager and status bar widget for **Omarchy Quattro** (Hyprland + Quickshell), featuring a curated theme catalog, instant one-click pacman installation, live variant selection, real-time search, and seamless GTK & Omarchy theme synchronization.
 
-![bar-widget](https://img.shields.io/badge/kind-bar--widget-blue)
-![license](https://img.shields.io/badge/license-MIT-green)
+---
 
-## Features
+## ✨ Features
 
-- **Browse** a curated catalog of popular icon themes (Papirus, Tela Circle, Pop, Obsidian, and more)
-- **Install** icon theme packages from Arch repos via pacman (with polkit authentication)
-- **Apply** any installed icon theme variant with a single click
-- **Dark/Light variants** — each theme group shows all available variants with mode badges
-- **Search** to quickly find themes
-- **Pre-installed themes** — Yaru, Adwaita, and Breeze variants are listed out of the box
+- 🎨 **Curated Theme Catalog** — Browse popular, high-quality icon theme suites including Papirus, Tela Circle, Pop, Deepin Bloom, Cosmic, Elementary, Oxygen, Yaru, Breeze, and Adwaita.
+- 📦 **One-Click Package Installation** — Download and install missing theme packages directly from the Arch Linux official repositories via pacman with secure polkit authorization (`pkexec`).
+- ⚡ **Instant Live Theme Switching** — Apply any theme variant with a single click. Changes immediately propagate across GTK 3, GTK 4, GSettings, Omarchy desktop theme files, and active dock/panel components.
+- 🌈 **Extensive Color Variant Selection** — Easily expand theme families to explore and select specialized colorways (e.g. Tela Circle Dracula, Nord, Manjaro, Ubuntu, Blue, Red, Green, etc.).
+- 🔍 **Real-Time Instant Search** — Quickly filter through theme names, variant styles, and descriptions as you type.
+- 🎛️ **Native Top Bar Widget (`BarWidget`)** — Sleek status bar launcher displaying a crisp palette glyph (`🎨`), seamlessly matching your active Omarchy status bar styling and theme colors.
+- 🛡️ **Clean & Native System Integration** — Automatically keeps `gsettings`, `~/.config/gtk-3.0/settings.ini`, `~/.config/gtk-4.0/settings.ini`, `~/.icons/default/index.theme`, and `~/.local/state/omarchy/current/theme/icons.theme` synchronized without polluting the filesystem.
+- 🚀 **100% Quickshell Native** — Smooth animations, reactive property bindings, and lightweight resource footprint.
 
-## Installation
+---
+
+## 🎨 Supported Icon Themes
+
+| Theme Family | Arch Package | Color & Style Variants |
+| :--- | :--- | :--- |
+| **Papirus** | `papirus-icon-theme` | Papirus, Papirus-Dark, Papirus-Light |
+| **Tela Circle** | `tela-circle-icon-theme-all` | 15 curated color schemes (Standard, Dracula, Nord, Blue, Brown, Green, Grey, Manjaro, Orange, Pink, Purple, Red, Ubuntu, Yellow, Black) |
+| **Pop** | `pop-icon-theme` | Adaptive Pop OS icon suite |
+| **Deepin / Bloom** | `deepin-icon-theme` | Bloom, Bloom-Dark, Bloom-Classic, Vintage, Sea |
+| **Cosmic** | `cosmic-icon-theme` | System76 COSMIC Desktop icons |
+| **Elementary** | `elementary-icon-theme` | Clean Elementary OS icon set |
+| **Oxygen** | `oxygen-icons` | Classic KDE Oxygen icon theme |
+| **Yaru** | *(Pre-installed / distro)* | 20 Ubuntu color variants (Standard, Dark, Red, Blue, Olive, Sage, Magenta, Purple, etc.) |
+| **Adwaita** | *(Pre-installed / distro)* | Standard GNOME Adwaita & Adwaita Legacy |
+| **Breeze** | *(Pre-installed / distro)* | KDE Breeze & Breeze-Dark |
+
+---
+
+## 📦 Installation
+
+Install and enable the widget with a single command:
 
 ```bash
-omarchy plugin add https://github.com/YOUR_USERNAME/omarchy-icons.git
-omarchy plugin enable icons
+omarchy plugin add https://github.com/rosakodu/omarchy-icons.git --enable
 ```
 
-The widget will appear in the bar. Click it to open the icon theme panel.
+---
 
-## Usage
+## 🎮 Usage
 
-1. Click the palette icon (🎨) in the bar
-2. Browse available icon themes in the panel
-3. Click a group to expand and see Dark/Light variants
-4. For themes not yet installed, click **Install package** to download via pacman
-5. Click any variant to apply it as your GTK icon theme
-6. The active theme is shown with a checkmark (✓)
+1. Click the palette icon (**🎨**) in the Omarchy top status bar.
+2. Browse through the catalog or use the **Search** field to find a specific theme.
+3. Click on any theme card to expand and view available color schemes or Dark/Light variants.
+4. If a theme is not yet installed on your system, click **Install package** to download it via pacman.
+5. Click on the desired variant to activate it instantly. The currently active theme is marked with a checkmark (**✓**).
 
-## Supported Icon Themes
+---
 
-| Theme | Package | Variants |
-|-------|---------|----------|
-| Papirus | `papirus-icon-theme` | Papirus Dark, Papirus Light |
-| Tela Circle | `tela-circle-icon-theme-all` | 15 color schemes (Standard, Dracula, Nord, Blue, Brown, etc.) |
-| Pop | `pop-icon-theme` | Pop (adaptive) |
-| Deepin / Bloom | `deepin-icon-theme` | Bloom, Bloom-dark, Bloom-classic, Vintage, Sea |
-| Cosmic | `cosmic-icon-theme` | Cosmic |
-| Elementary | `elementary-icon-theme` | elementary |
-| Oxygen | `oxygen-icons` | Oxygen |
-| Yaru | pre-installed | 20 color/dark variants |
-| Adwaita | pre-installed | Adwaita |
-| Breeze | pre-installed | Breeze, Breeze-dark |
+## ⚙️ How It Works
 
-## How it Works
+- **Package Management:** Downloads verified official packages using `pkexec pacman -S --noconfirm <package>`.
+- **System Sync:** Seamlessly writes the active theme name to:
+  - `gsettings set org.gnome.desktop.interface icon-theme "<theme>"`
+  - `~/.config/gtk-3.0/settings.ini`
+  - `~/.config/gtk-4.0/settings.ini`
+  - `~/.icons/default/index.theme`
+  - `~/.local/state/omarchy/current/theme/icons.theme`
+- **Real-Time Discovery:** Scans installed themes directly from `/usr/share/icons/`, `~/.local/share/icons/`, and `~/.icons/`.
 
-- Icon themes are installed via `pkexec pacman -S` (prompts for password)
-- Themes are applied via `gsettings set org.gnome.desktop.interface icon-theme`
-- The plugin reads installed themes from `/usr/share/icons/`, `~/.local/share/icons/`, and `~/.icons/`
+---
 
-## Note
+## 🗑️ Uninstallation
 
-When you switch Omarchy themes (`omarchy theme set`), the icon theme may be overridden by the theme's `icons.theme` file. This is standard Omarchy behavior — the icon theme is part of the overall desktop theme.
+```bash
+omarchy plugin remove icons
+```
 
-## License
+---
 
-MIT
+## 📄 License
+
+[MIT](./LICENSE) © 2026 rosakodu

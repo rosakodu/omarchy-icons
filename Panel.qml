@@ -173,21 +173,41 @@ Panel {
             + 'if [ -d "$HOME/.local/state/omarchy/current/theme" ]; then '
             + '  echo "$THEME" > "$HOME/.local/state/omarchy/current/theme/icons.theme" 2>/dev/null || true; '
             + 'fi; '
-            + 'DEST="$HOME/.local/share/icons/0-active-theme"; '
-            + 'rm -rf "$DEST"; mkdir -p "$DEST"; '
-            + 'PARENT="${THEME%%-*}"; '
-            + 'for tdir in "$HOME/.local/share/icons/$THEME" "/usr/share/icons/$THEME" "$HOME/.local/share/icons/$PARENT" "/usr/share/icons/$PARENT"; do '
-            + '  if [ -d "$tdir" ]; then '
-            + '    for appdir in "$tdir/64x64/apps" "$tdir/scalable/apps" "$tdir/base/64x64/apps" "$tdir/base/128x128/apps" "$tdir/48x48/apps" "$tdir/128x128/apps" "$tdir/apps" "$tdir"/*/apps "$tdir"/base/*/apps; do '
-            + '      if [ -d "$appdir" ]; then '
-            + '        cp -as "$appdir" "$DEST/apps" 2>/dev/null && break 2; '
-            + '      fi; '
-            + '    done; '
+            + 'ICON_BASES=("$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"); '
+            + 'CANDIDATE_THEMES=("$THEME"); '
+            + '[[ "$THEME" == *-* ]] && CANDIDATE_THEMES+=("${THEME%-*}"); '
+            + '[[ "$THEME" == *_* ]] && CANDIDATE_THEMES+=("${THEME%_*}"); '
+            + 'CANDIDATE_THEMES+=("${THEME%%-*}"); '
+            + 'for b in "${ICON_BASES[@]}"; do '
+            + '  if [ -f "$b/$THEME/index.theme" ]; then '
+            + '    inh=$(grep -E "^Inherits=" "$b/$THEME/index.theme" 2>/dev/null | cut -d= -f2 | tr "," " "); '
+            + '    for p in $inh; do [ -n "$p" ] && [ "$p" != "hicolor" ] && CANDIDATE_THEMES+=("$p"); done; '
             + '  fi; '
             + 'done; '
-            + 'if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
-            + '  cp -as /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
-            + 'fi'
+            + 'for DEST in "$HOME/.local/share/icons/0-active-theme" "$HOME/.icons/0-active-theme"; do '
+            + '  rm -rf "$DEST"; '
+            + '  mkdir -p "$DEST/apps"; '
+            + '  for (( i=${#CANDIDATE_THEMES[@]}-1; i>=0; i-- )); do '
+            + '    t="${CANDIDATE_THEMES[i]}"; '
+            + '    for base in "${ICON_BASES[@]}"; do '
+            + '      tdir="$base/$t"; '
+            + '      if [ -d "$tdir" ]; then '
+            + '        for sub in "scalable/apps" "64x64/apps" "48x48/apps" "128x128/apps" "32x32/apps" "apps" "scalable/applications" "base/64x64/apps" "base/128x128/apps"; do '
+            + '          if [ -d "$tdir/$sub" ]; then '
+            + '            real=$(realpath -e "$tdir/$sub" 2>/dev/null); '
+            + '            if [ -n "$real" ] && [ -d "$real" ]; then '
+            + '              cp -asf "$real"/* "$DEST/apps/" 2>/dev/null || true; '
+            + '              break; '
+            + '            fi; '
+            + '          fi; '
+            + '        done; '
+            + '      fi; '
+            + '    done; '
+            + '  done; '
+            + '  if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '    cp -asf /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
+            + '  fi; '
+            + 'done'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
@@ -265,6 +285,9 @@ Panel {
             root.applyingThemeName = ""
             if (exitCode === 0) {
                 root.statusMessage = "Theme applied! Reloading…"
+                if (root.bar && root.bar.shell && root.bar.shell.appLibrary && typeof root.bar.shell.appLibrary.refreshIcons === "function") {
+                    root.bar.shell.appLibrary.refreshIcons()
+                }
                 restartShellTimer.restart()
             } else {
                 root.statusMessage = "Apply failed"
