@@ -37,7 +37,7 @@ The widget will appear in the bar. Click it to open the icon theme panel.
 | Theme | Package | Variants |
 |-------|---------|----------|
 | Papirus | `papirus-icon-theme` | Papirus Dark, Papirus Light |
-| Tela Circle | `tela-circle-icon-theme-all` | 24 color/dark variants (Dracula, Nord, Blue, Red, etc.) |
+| Tela Circle | `tela-circle-icon-theme-all` | 15 color schemes (Standard, Dracula, Nord, Blue, Brown, etc.) |
 | Pop | `pop-icon-theme` | Pop (adaptive) |
 | Deepin / Bloom | `deepin-icon-theme` | Bloom, Bloom-dark, Bloom-classic, Vintage, Sea |
 | Cosmic | `cosmic-icon-theme` | Cosmic |
