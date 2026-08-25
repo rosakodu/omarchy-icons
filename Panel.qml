@@ -192,11 +192,11 @@ Panel {
             + '    for base in "${ICON_BASES[@]}"; do '
             + '      tdir="$base/$t"; '
             + '      if [ -d "$tdir" ]; then '
-            + '        for sub in "scalable/apps" "64x64/apps" "48x48/apps" "128x128/apps" "32x32/apps" "apps" "scalable/applications" "base/64x64/apps" "base/128x128/apps"; do '
+            + '        for sub in "256x256/apps" "scalable/apps" "64x64/apps" "48x48/apps" "128x128/apps" "32x32/apps" "apps" "scalable/applications" "base/64x64/apps" "base/128x128/apps"; do '
             + '          if [ -d "$tdir/$sub" ]; then '
             + '            real=$(realpath -e "$tdir/$sub" 2>/dev/null); '
             + '            if [ -n "$real" ] && [ -d "$real" ]; then '
-            + '              cp -asf "$real"/* "$DEST/apps/" 2>/dev/null || true; '
+            + '              find -L "$real" -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
             + '              break; '
             + '            fi; '
             + '          fi; '
@@ -204,8 +204,10 @@ Panel {
             + '      fi; '
             + '    done; '
             + '  done; '
-            + '  if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
-            + '    cp -asf /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
+            + '  if [ -d "/usr/share/icons/Yaru/256x256/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '    find -L /usr/share/icons/Yaru/256x256/apps -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
+            + '  elif [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '    find -L /usr/share/icons/Yaru/scalable/apps -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
             + '  fi; '
             + 'done'
         applyProcess.command = ["bash", "-c", script, themeName]
@@ -313,6 +315,9 @@ Panel {
             if (exitCode === 0) {
                 root.statusMessage = "Installed successfully"
                 root.refreshAll()
+                if (root.currentTheme && root.currentTheme.length > 0) {
+                    root.applyTheme(root.currentTheme)
+                }
             } else {
                 root.statusMessage = "Install failed"
             }
