@@ -88,7 +88,8 @@ Panel {
         "cosmic-icon-theme",
         "elementary-icon-theme",
         "deepin-icon-theme",
-        "oxygen-icons"
+        "oxygen-icons",
+        "oxygen-icons-svg"
     ]
 
     function isAllowedPackage(pkg) {
@@ -168,6 +169,15 @@ Panel {
             + 'NEW_DIR="$HOME/.local/share/icons/0-active-theme-new-$$"; '
             + 'OLD_TARGET=""; '
             + '[ -L "$LINK" ] && OLD_TARGET=$(readlink "$LINK"); '
+            + 'cleanup_stale() { '
+            + '  local cur=""; [ -L "$LINK" ] && cur=$(readlink "$LINK" 2>/dev/null || true); '
+            + '  for d in "$HOME/.local/share/icons"/0-active-theme-new-* "$HOME/.local/share/icons"/0-active-theme.tmp* "$HOME/.local/share/icons"/0-active-theme.atomic-tmp*; do '
+            + '    if [ -d "$d" ] || [ -L "$d" ]; then '
+            + '      [ "$d" != "$cur" ] && [ "$d" != "$NEW_DIR" ] && rm -rf "$d" 2>/dev/null || true; '
+            + '    fi; '
+            + '  done; '
+            + '}; '
+            + 'cleanup_stale; '
             + 'rm -rf "$NEW_DIR"; '
             + 'mkdir -p "$NEW_DIR/apps"; '
             + 'for pdir in /usr/share/pixmaps "$HOME/.local/share/pixmaps" "$HOME/.local/share/applications/icons"; do '
@@ -270,7 +280,7 @@ Panel {
             + 'make_alias "portproton" "ru.linux_gaming.PortProtonQt"; '
             + 'for f in "$NEW_DIR/apps/"*; do [ ! -e "$f" ] && rm -f "$f" 2>/dev/null || true; done; '
             + 'ln -sfn "$NEW_DIR" "$LINK.atomic-tmp" && mv -Tf "$LINK.atomic-tmp" "$LINK"; '
-            + '[ -n "$OLD_TARGET" ] && [ "$OLD_TARGET" != "$NEW_DIR" ] && rm -rf "$OLD_TARGET" 2>/dev/null || true; '
+            + 'cleanup_stale; '
             + 'gsettings set org.gnome.desktop.interface icon-theme "$THEME" 2>/dev/null || true; '
             + 'mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.icons/default"; '
             + 'printf "[Settings]\\ngtk-icon-theme-name=%s\\n" "$THEME" > "$HOME/.config/gtk-3.0/settings.ini"; '
@@ -301,7 +311,8 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Installing " + packageName + "…"
-        installProcess.command = ["pkexec", "pacman", "-S", "--noconfirm", packageName]
+        var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
+        installProcess.command = ["pkexec", "bash", "-c", "pacman -S --noconfirm --needed " + pkgs + " 2>&1"]
         installProcess.running = true
     }
 
@@ -310,7 +321,8 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Removing " + packageName + "…"
-        removeProcess.command = ["pkexec", "bash", "-c", "pacman -Rns --noconfirm \"$0\" 2>&1 || pacman -R --noconfirm \"$0\" 2>&1", packageName]
+        var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
+        removeProcess.command = ["pkexec", "bash", "-c", "pacman -Rns --noconfirm " + pkgs + " 2>&1 || pacman -R --noconfirm " + pkgs + " 2>&1"]
         removeProcess.running = true
     }
 
