@@ -318,11 +318,38 @@ Panel {
         installProcess.running = true
     }
 
+    property bool resetToAdwaitaOnRemove: false
+
+    function packageContainsCurrentTheme(packageName) {
+        if (!packageName) return false
+        for (var i = 0; i < IconCatalog.catalog.length; i++) {
+            var item = IconCatalog.catalog[i]
+            if (item.package === packageName) {
+                if (item.variants) {
+                    for (var v = 0; v < item.variants.length; v++) {
+                        if (item.variants[v].theme === root.currentTheme) {
+                            return true
+                        }
+                    }
+                }
+                if (item.theme === root.currentTheme) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     function removePackage(packageName) {
         if (root.installing || root.applying || !root.isAllowedPackage(packageName)) return
+        var isCurrent = root.packageContainsCurrentTheme(packageName)
+        root.resetToAdwaitaOnRemove = isCurrent
         root.installing = true
         root.operatingPackage = packageName
-        root.statusMessage = "Removing " + packageName + "…"
+        root.statusMessage = isCurrent ? "Reverting to Adwaita & removing " + packageName + "…" : "Removing " + packageName + "…"
+        if (isCurrent) {
+            root.currentTheme = "Adwaita"
+        }
         var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
             + 'pacman -Rns --noconfirm "$0" 2>&1 || pacman -R --noconfirm "$0" 2>&1'
         removeProcess.command = ["pkexec", "bash", "-c", cmd, packageName]
@@ -438,13 +465,24 @@ Panel {
         onExited: function(exitCode) {
             root.installing = false
             root.operatingPackage = ""
+            var needAdwaita = root.resetToAdwaitaOnRemove
+            root.resetToAdwaitaOnRemove = false
+
             if (exitCode === 0) {
-                root.statusMessage = "Removed successfully"
-                root.refreshAll()
+                root.statusMessage = needAdwaita ? "Removed. Reverted to Adwaita." : "Removed successfully"
+                if (needAdwaita) {
+                    root.applyTheme("Adwaita")
+                } else {
+                    root.refreshAll()
+                }
             } else {
                 var err = String(removeStderr.text || removeStdout.text || "Remove failed").trim().split("\n")[0]
                 root.statusMessage = err.length > 0 ? err : "Remove failed"
-                root.refreshAll()
+                if (needAdwaita) {
+                    root.applyTheme("Adwaita")
+                } else {
+                    root.refreshAll()
+                }
             }
             statusClearTimer.restart()
         }
