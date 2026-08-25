@@ -88,8 +88,7 @@ Panel {
         "cosmic-icon-theme",
         "elementary-icon-theme",
         "deepin-icon-theme",
-        "oxygen-icons",
-        "oxygen-icons-svg"
+        "oxygen-icons"
     ]
 
     function isAllowedPackage(pkg) {
@@ -311,10 +310,9 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Installing " + packageName + "…"
-        var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
         var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
-            + 'pacman -S --noconfirm --needed ' + pkgs + ' 2>&1'
-        installProcess.command = ["pkexec", "bash", "-c", cmd]
+            + 'pacman -S --noconfirm --needed "$0" 2>&1'
+        installProcess.command = ["pkexec", "bash", "-c", cmd, packageName]
         installProcess.running = true
     }
 
@@ -323,11 +321,9 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Removing " + packageName + "…"
-        var pkgs = packageName === "oxygen-icons" ? "oxygen-icons oxygen-icons-svg" : packageName
         var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
-            + 'TARGETS=""; for p in ' + pkgs + '; do pacman -Q "$p" &>/dev/null && TARGETS="$TARGETS $p"; done; '
-            + 'if [ -n "$TARGETS" ]; then pacman -Rns --noconfirm $TARGETS 2>&1 || pacman -R --noconfirm $TARGETS 2>&1; fi'
-        removeProcess.command = ["pkexec", "bash", "-c", cmd]
+            + 'pacman -Rns --noconfirm "$0" 2>&1 || pacman -R --noconfirm "$0" 2>&1'
+        removeProcess.command = ["pkexec", "bash", "-c", cmd, packageName]
         removeProcess.running = true
     }
 
