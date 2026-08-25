@@ -86,7 +86,10 @@ Panel {
         "pop-icon-theme",
         "obsidian-icon-theme",
         "cosmic-icon-theme",
-        "elementary-icon-theme"
+        "elementary-icon-theme",
+        "deepin-icon-theme",
+        "mate-icon-theme-faenza",
+        "oxygen-icons-svg"
     ]
 
     function isAllowedPackage(pkg) {

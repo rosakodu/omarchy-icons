@@ -1,10 +1,8 @@
 // IconCatalog.js — Catalog of available icon themes for Omarchy
-// Each entry maps to a pacman package with its theme variants.
+// All downloadable packages come directly from Arch Linux official repositories (pacman).
 
 .pragma library
 
-// Icon theme catalog — each group represents a pacman package
-// with one or more GTK icon theme variants inside it.
 var catalog = [
     {
         name: "Papirus",
@@ -29,21 +27,54 @@ var catalog = [
             { name: "Tela Circle Black Dark", theme: "Tela-circle-black-dark", mode: "dark" },
             { name: "Tela Circle Blue",       theme: "Tela-circle-blue",       mode: "auto" },
             { name: "Tela Circle Blue Dark",  theme: "Tela-circle-blue-dark",  mode: "dark" },
+            { name: "Tela Circle Dracula",    theme: "Tela-circle-dracula",    mode: "dark" },
+            { name: "Tela Circle Dracula Dark", theme: "Tela-circle-dracula-dark", mode: "dark" },
             { name: "Tela Circle Green",      theme: "Tela-circle-green",      mode: "auto" },
             { name: "Tela Circle Green Dark", theme: "Tela-circle-green-dark", mode: "dark" },
+            { name: "Tela Circle Nord",       theme: "Tela-circle-nord",       mode: "dark" },
+            { name: "Tela Circle Nord Dark",  theme: "Tela-circle-nord-dark",  mode: "dark" },
+            { name: "Tela Circle Orange",     theme: "Tela-circle-orange",     mode: "auto" },
+            { name: "Tela Circle Orange Dark",theme: "Tela-circle-orange-dark",mode: "dark" },
+            { name: "Tela Circle Pink",       theme: "Tela-circle-pink",       mode: "auto" },
+            { name: "Tela Circle Pink Dark",  theme: "Tela-circle-pink-dark",  mode: "dark" },
+            { name: "Tela Circle Purple",     theme: "Tela-circle-purple",     mode: "auto" },
+            { name: "Tela Circle Purple Dark",theme: "Tela-circle-purple-dark",mode: "dark" },
             { name: "Tela Circle Red",        theme: "Tela-circle-red",        mode: "auto" },
             { name: "Tela Circle Red Dark",   theme: "Tela-circle-red-dark",   mode: "dark" },
-            { name: "Tela Circle Pink",       theme: "Tela-circle-pink",       mode: "auto" },
-            { name: "Tela Circle Pink Dark",  theme: "Tela-circle-pink-dark",  mode: "dark" }
+            { name: "Tela Circle Yellow",     theme: "Tela-circle-yellow",     mode: "auto" },
+            { name: "Tela Circle Yellow Dark",theme: "Tela-circle-yellow-dark",mode: "dark" },
+            { name: "Tela Circle Manjaro",    theme: "Tela-circle-manjaro",    mode: "auto" },
+            { name: "Tela Circle Ubuntu",     theme: "Tela-circle-ubuntu",     mode: "auto" }
         ]
     },
     {
         name: "Pop",
         package: "pop-icon-theme",
-        description: "System76 Pop icon theme",
+        description: "System76 Pop!_OS official icon theme",
         variants: [
             { name: "Pop",      theme: "Pop",      mode: "light" },
             { name: "Pop Dark", theme: "Pop-dark",  mode: "dark" }
+        ]
+    },
+    {
+        name: "Deepin / Bloom",
+        package: "deepin-icon-theme",
+        description: "Deepin Desktop elegant icon theme (Bloom & Vintage)",
+        variants: [
+            { name: "Bloom",                theme: "bloom",                mode: "auto" },
+            { name: "Bloom Dark",           theme: "bloom-dark",           mode: "dark" },
+            { name: "Bloom Classic",        theme: "bloom-classic",        mode: "auto" },
+            { name: "Bloom Classic Dark",   theme: "bloom-classic-dark",   mode: "dark" },
+            { name: "Vintage",              theme: "vintage",              mode: "auto" }
+        ]
+    },
+    {
+        name: "Faenza",
+        package: "mate-icon-theme-faenza",
+        description: "Legendary square icon theme with rounded corners",
+        variants: [
+            { name: "Faenza",      theme: "matefaenza",     mode: "light" },
+            { name: "Faenza Dark", theme: "matefaenzadark", mode: "dark" }
         ]
     },
     {
@@ -68,6 +99,14 @@ var catalog = [
         description: "Icons from the elementary OS Pantheon desktop",
         variants: [
             { name: "elementary", theme: "elementary", mode: "auto" }
+        ]
+    },
+    {
+        name: "Oxygen",
+        package: "oxygen-icons-svg",
+        description: "Classic detailed KDE Oxygen vector icon theme",
+        variants: [
+            { name: "Oxygen", theme: "oxygen", mode: "auto" }
         ]
     },
     {
@@ -116,7 +155,6 @@ var catalog = [
     }
 ]
 
-// Returns flat list of all variants with parent group metadata attached.
 function allVariants() {
     var result = []
     for (var i = 0; i < catalog.length; i++) {

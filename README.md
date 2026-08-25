@@ -37,11 +37,14 @@ The widget will appear in the bar. Click it to open the icon theme panel.
 | Theme | Package | Variants |
 |-------|---------|----------|
 | Papirus | `papirus-icon-theme` | Papirus, Papirus-Dark, Papirus-Light, ePapirus, ePapirus-Dark |
-| Tela Circle | `tela-circle-icon-theme-all` | 12 color/dark variants |
+| Tela Circle | `tela-circle-icon-theme-all` | 24 color/dark variants (Dracula, Nord, Blue, Red, etc.) |
 | Pop | `pop-icon-theme` | Pop, Pop-dark |
+| Deepin / Bloom | `deepin-icon-theme` | Bloom, Bloom-dark, Bloom-classic, Vintage |
+| Faenza | `mate-icon-theme-faenza` | Faenza, Faenza-dark |
 | Obsidian | `obsidian-icon-theme` | Obsidian |
 | Cosmic | `cosmic-icon-theme` | Cosmic |
 | Elementary | `elementary-icon-theme` | elementary |
+| Oxygen | `oxygen-icons-svg` | Oxygen |
 | Yaru | pre-installed | 20 color/dark variants |
 | Adwaita | pre-installed | Adwaita |
 | Breeze | pre-installed | Breeze, Breeze-dark |
