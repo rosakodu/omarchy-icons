@@ -43,11 +43,12 @@ Panel {
     property string currentTheme: ""
     property var installedThemes: []
     property var packageStatus: ({})
-    property var expandedGroups: ({})
+    property int expandedGroupIndex: -1
 
     property bool scanning: false
     property bool installing: false
     property bool applying: false
+    property string applyingThemeName: ""
     property string statusMessage: ""
     property string operatingPackage: ""
     property string searchText: ""
@@ -114,15 +115,11 @@ Panel {
     }
 
     function toggleGroup(index) {
-        var next = {}
-        for (var k in root.expandedGroups) next[k] = root.expandedGroups[k]
-        if (next[index]) delete next[index]
-        else next[index] = true
-        root.expandedGroups = next
+        root.expandedGroupIndex = (root.expandedGroupIndex === index) ? -1 : index
     }
 
     function isGroupExpanded(index) {
-        return root.expandedGroups[index] === true
+        return root.expandedGroupIndex === index
     }
 
     function modeColor(mode) {
@@ -170,14 +167,17 @@ Panel {
     }
 
     function applyTheme(themeName) {
+        if (root.applying || root.installing) return
         if (!/^[A-Za-z0-9_-]+$/.test(themeName)) {
             root.statusMessage = "Invalid theme name"
             statusClearTimer.restart()
             return
         }
-        root.currentTheme = themeName
         root.applying = true
+        root.applyingThemeName = themeName
+        root.currentTheme = themeName
         root.statusMessage = "Applying " + themeName + "…"
+
         var script = 'THEME="$0"; '
             + 'gsettings set org.gnome.desktop.interface icon-theme "$THEME"; '
             + 'mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.icons/default"; '
@@ -189,31 +189,27 @@ Panel {
             + 'fi; '
             + 'DEST="$HOME/.local/share/icons/0-active-theme"; '
             + 'rm -rf "$DEST"; mkdir -p "$DEST"; '
-            + 'CANDIDATES=("$THEME"); '
-            + '[[ "$THEME" == Papirus* ]] && CANDIDATES+=("Papirus"); '
-            + '[[ "$THEME" == Tela-circle* ]] && CANDIDATES+=("Tela-circle"); '
-            + '[[ "$THEME" == Yaru* ]] && CANDIDATES+=("Yaru"); '
-            + '[[ "$THEME" == bloom* ]] && CANDIDATES+=("bloom"); '
-            + '[[ "$THEME" == matefaenza* ]] && CANDIDATES+=("matefaenza"); '
-            + '[[ "$THEME" == breeze* ]] && CANDIDATES+=("breeze"); '
-            + 'for t in "${CANDIDATES[@]}"; do '
-            + '  for base in "$HOME/.local/share/icons" "/usr/share/icons"; do '
-            + '    tdir="$base/$t"; '
-            + '    if [ -d "$tdir" ]; then '
-            + '      for s in 128x128 64x64 48x48 32x32 24x24 16x16 scalable apps; do '
-            + '        if [ -d "$tdir/$s/apps" ]; then cp -as "$tdir/$s/apps" "$DEST/" 2>/dev/null || true; '
-            + '        elif [ -d "$tdir/$s" ] && [ "$s" = "apps" ]; then cp -as "$tdir/$s" "$DEST/" 2>/dev/null || true; '
-            + '        fi; '
-            + '      done; '
-            + '    fi; '
-            + '  done; '
-            + 'done'
+            + 'PARENT="${THEME%%-*}"; '
+            + 'for tdir in "$HOME/.local/share/icons/$THEME" "/usr/share/icons/$THEME" "$HOME/.local/share/icons/$PARENT" "/usr/share/icons/$PARENT"; do '
+            + '  if [ -d "$tdir" ]; then '
+            + '    for s in 64x64 scalable 48x48 32x32 128x128 apps; do '
+            + '      if [ -d "$tdir/$s/apps" ]; then '
+            + '        cp -as "$tdir/$s/apps" "$DEST/apps" 2>/dev/null && break 2; '
+            + '      elif [ -d "$tdir/$s" ] && [ "$s" = "apps" ]; then '
+            + '        cp -as "$tdir/$s" "$DEST/apps" 2>/dev/null && break 2; '
+            + '      fi; '
+            + '    done; '
+            + '  fi; '
+            + 'done; '
+            + 'if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '  cp -as /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
+            + 'fi'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
 
     function installPackage(packageName) {
-        if (root.installing || !root.isAllowedPackage(packageName)) return
+        if (root.installing || root.applying || !root.isAllowedPackage(packageName)) return
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Installing " + packageName + "…"
@@ -222,7 +218,7 @@ Panel {
     }
 
     function removePackage(packageName) {
-        if (root.installing || !root.isAllowedPackage(packageName)) return
+        if (root.installing || root.applying || !root.isAllowedPackage(packageName)) return
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Removing " + packageName + "…"
@@ -282,6 +278,7 @@ Panel {
     property Process applyProcess: Process {
         onExited: function(exitCode) {
             root.applying = false
+            root.applyingThemeName = ""
             if (exitCode === 0) {
                 root.statusMessage = "Theme applied"
             } else {
@@ -381,7 +378,7 @@ Panel {
                 Text {
                     visible: root.statusMessage !== ""
                     text: root.statusMessage
-                    color: root.statusMessage.indexOf("failed") !== -1 ? Color.urgent : root.dimColor
+                    color: root.statusMessage.indexOf("failed") !== -1 || root.statusMessage.indexOf("Please install") !== -1 ? Color.urgent : root.dimColor
                     font.family: root.contentFontFamily
                     font.pixelSize: Style.font.caption
                     font.bold: true
@@ -461,6 +458,7 @@ Panel {
                                 visible: group.package !== null
                                 width: parent.width
                                 leftAlign: true
+                                enabled: !root.installing && !root.applying
                                 foreground: root.contentForeground
                                 fontFamily: root.contentFontFamily
                                 text: {
@@ -474,7 +472,7 @@ Panel {
                                 iconSpinning: root.installing && root.operatingPackage === group.package
 
                                 onClicked: {
-                                    if (root.installing) return
+                                    if (root.installing || root.applying) return
                                     if (groupDelegate.pkgInstalled)
                                         root.removePackage(group.package)
                                     else
@@ -510,17 +508,21 @@ Panel {
                                     readonly property var variant: groupDelegate.group.variants[index]
                                     readonly property bool themeInstalled: root.isThemeInstalled(variant.theme)
                                     readonly property bool themeActive: root.isThemeActive(variant.theme)
+                                    readonly property bool isApplyingThis: root.applying && root.applyingThemeName === variant.theme
 
                                     width: groupDelegate.width
                                     leftAlign: true
+                                    enabled: !root.applying && !root.installing
                                     foreground: root.contentForeground
                                     fontFamily: root.contentFontFamily
                                     selected: themeActive
 
                                     text: variant.name
-                                    iconText: themeActive ? "\uf00c" : (themeInstalled ? "\uf111" : "\uf10c")
+                                    iconText: isApplyingThis ? "\uf110" : (themeActive ? "\uf00c" : (themeInstalled ? "\uf111" : "\uf10c"))
+                                    iconSpinning: isApplyingThis
 
                                     onClicked: {
+                                        if (root.applying || root.installing) return
                                         if (themeActive) return
                                         if (themeInstalled || groupDelegate.pkgInstalled || groupDelegate.group.package === null) {
                                             root.applyTheme(variant.theme)
@@ -573,6 +575,7 @@ Panel {
                     Button {
                         text: "Refresh"
                         iconText: "\uf021"
+                        enabled: !root.applying && !root.installing
                         foreground: root.contentForeground
                         fontFamily: root.contentFontFamily
                         iconSpinning: root.scanning
