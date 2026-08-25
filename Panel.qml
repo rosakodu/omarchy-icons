@@ -85,11 +85,9 @@ Panel {
         "papirus-icon-theme",
         "tela-circle-icon-theme-all",
         "pop-icon-theme",
-        "obsidian-icon-theme",
         "cosmic-icon-theme",
         "elementary-icon-theme",
         "deepin-icon-theme",
-        "mate-icon-theme-faenza",
         "oxygen-icons"
     ]
 
@@ -120,18 +118,6 @@ Panel {
 
     function isGroupExpanded(index) {
         return root.expandedGroupIndex === index
-    }
-
-    function modeColor(mode) {
-        if (mode === "dark") return Qt.darker(root.contentForeground, 1.8)
-        if (mode === "light") return Qt.lighter(root.contentForeground, 1.8)
-        return "transparent"
-    }
-
-    function modeTextColor(mode) {
-        if (mode === "dark") return Qt.lighter(root.contentForeground, 1.5)
-        if (mode === "light") return Qt.darker(root.contentForeground, 2.0)
-        return root.dimColor
     }
 
     // ------------------------------------------------------------------ actions
@@ -438,7 +424,6 @@ Panel {
                             leftAlign: true
                             foreground: root.contentForeground
                             fontFamily: root.contentFontFamily
-                            tooltipText: group.description
 
                             onClicked: root.toggleGroup(index)
 
@@ -493,19 +478,6 @@ Panel {
                                 strength: 0.06
                             }
 
-                            // Description
-                            Text {
-                                width: parent.width
-                                text: group.description
-                                color: root.dimColor
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption
-                                wrapMode: Text.Wrap
-                                leftPadding: Style.spacing.controlPaddingX
-                                topPadding: Style.space(6)
-                                bottomPadding: Style.space(4)
-                            }
-
                             // ---- Variant rows ----
                             Repeater {
                                 model: group.variants.length
@@ -536,28 +508,6 @@ Panel {
                                         } else {
                                             root.statusMessage = "Please install " + groupDelegate.group.name + " first"
                                             statusClearTimer.restart()
-                                        }
-                                    }
-
-                                    // Mode badge
-                                    Rectangle {
-                                        visible: variant.mode !== "auto"
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: Style.spacing.controlPaddingX
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: modeBadgeText.implicitWidth + Style.space(10)
-                                        height: modeBadgeText.implicitHeight + Style.space(4)
-                                        radius: Style.cornerRadius
-                                        color: root.modeColor(variant.mode)
-
-                                        Text {
-                                            id: modeBadgeText
-                                            anchors.centerIn: parent
-                                            text: variant.mode === "dark" ? "Dark" : "Light"
-                                            color: root.modeTextColor(variant.mode)
-                                            font.family: root.contentFontFamily
-                                            font.pixelSize: Style.font.caption * 0.9
-                                            font.bold: true
                                         }
                                     }
                                 }
