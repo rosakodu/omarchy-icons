@@ -9,7 +9,7 @@ var catalog = [
         package: "papirus-icon-theme",
         description: "Modern flat icon theme with material design colors",
         variants: [
-            { name: "Papirus", theme: "Papirus-Dark" }
+            { name: "Papirus", theme: "Papirus" }
         ]
     },
     {

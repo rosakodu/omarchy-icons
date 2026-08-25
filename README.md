@@ -21,7 +21,7 @@ A modern, highly polished, and fully native icon theme manager and status bar wi
 
 | Theme Family | Arch Package | Color & Style Variants |
 | :--- | :--- | :--- |
-| **Papirus** | `papirus-icon-theme` | Papirus, Papirus-Dark, Papirus-Light |
+| **Papirus** | `papirus-icon-theme` | Papirus |
 | **Tela Circle** | `tela-circle-icon-theme-all` | 15 curated color schemes (Standard, Dracula, Nord, Blue, Brown, Green, Grey, Manjaro, Orange, Pink, Purple, Red, Ubuntu, Yellow, Black) |
 | **Pop** | `pop-icon-theme` | Adaptive Pop OS icon suite |
 | **Deepin / Bloom** | `deepin-icon-theme` | Bloom, Bloom-Dark, Bloom-Classic, Vintage, Sea |

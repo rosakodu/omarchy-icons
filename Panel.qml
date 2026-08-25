@@ -186,43 +186,30 @@ Panel {
             + '    sed -i -E \'s/^icon_theme=.*/icon_theme=\'"$THEME"\'/\' "$qfile" 2>/dev/null || true; '
             + '  fi; '
             + 'done; '
-            + 'ICON_BASES=("$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"); '
-            + 'CANDIDATE_THEMES=("$THEME"); '
-            + '[[ "$THEME" == *-* ]] && CANDIDATE_THEMES+=("${THEME%-*}"); '
-            + '[[ "$THEME" == *_* ]] && CANDIDATE_THEMES+=("${THEME%_*}"); '
-            + 'CANDIDATE_THEMES+=("${THEME%%-*}"); '
-            + 'for b in "${ICON_BASES[@]}"; do '
-            + '  if [ -f "$b/$THEME/index.theme" ]; then '
-            + '    inh=$(grep -E "^Inherits=" "$b/$THEME/index.theme" 2>/dev/null | cut -d= -f2 | tr "," " "); '
-            + '    for p in $inh; do [ -n "$p" ] && [ "$p" != "hicolor" ] && CANDIDATE_THEMES+=("$p"); done; '
-            + '  fi; '
+            + 'DEST="$HOME/.local/share/icons/0-active-theme"; '
+            + 'rm -rf "$DEST"; mkdir -p "$DEST/apps"; '
+            + 'for png in /usr/share/pixmaps/*.png; do '
+            + '  [ -f "$png" ] || continue; '
+            + '  name=$(basename "$png" .png); '
+            + '  b64=$(base64 -w0 "$png"); '
+            + '  printf "<svg xmlns=\\"http://www.w3.org/2000/svg\\" xmlns:xlink=\\"http://www.w3.org/1999/xlink\\" width=\\"512\\" height=\\"512\\" viewBox=\\"0 0 512 512\\"><image width=\\"512\\" height=\\"512\\" xlink:href=\\"data:image/png;base64,%s\\"/></svg>\\n" "$b64" > "$DEST/apps/$name.svg"; '
             + 'done; '
-            + 'for DEST in "$HOME/.local/share/icons/0-active-theme" "$HOME/.icons/0-active-theme"; do '
-            + '  rm -rf "$DEST"; '
-            + '  mkdir -p "$DEST/apps"; '
-            + '  for (( i=${#CANDIDATE_THEMES[@]}-1; i>=0; i-- )); do '
-            + '    t="${CANDIDATE_THEMES[i]}"; '
-            + '    for base in "${ICON_BASES[@]}"; do '
-            + '      tdir="$base/$t"; '
-            + '      if [ -d "$tdir" ]; then '
-            + '        for sub in "256x256/apps" "scalable/apps" "64x64/apps" "48x48/apps" "128x128/apps" "32x32/apps" "apps" "scalable/applications" "base/64x64/apps" "base/128x128/apps"; do '
-            + '          if [ -d "$tdir/$sub" ]; then '
-            + '            real=$(realpath -e "$tdir/$sub" 2>/dev/null); '
-            + '            if [ -n "$real" ] && [ -d "$real" ]; then '
-            + '              find -L "$real" -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
-            + '              break; '
-            + '            fi; '
-            + '          fi; '
-            + '        done; '
+            + 'for hdir in /usr/share/icons/hicolor/scalable/apps /usr/share/icons/hicolor/512x512/apps /usr/share/icons/hicolor/256x256/apps /usr/share/icons/hicolor/128x128/apps /usr/share/icons/hicolor/64x64/apps /usr/share/icons/hicolor/48x48/apps; do '
+            + '  if [ -d "$hdir" ]; then cp -as "$hdir"/* "$DEST/apps/" 2>/dev/null || true; fi; '
+            + 'done; '
+            + 'PARENT="${THEME%%-*}"; '
+            + 'for tdir in "$HOME/.local/share/icons/$THEME" "/usr/share/icons/$THEME" "$HOME/.local/share/icons/$PARENT" "/usr/share/icons/$PARENT"; do '
+            + '  if [ -d "$tdir" ]; then '
+            + '    for appdir in "$tdir/64x64/apps" "$tdir/scalable/apps" "$tdir/base/64x64/apps" "$tdir/base/128x128/apps" "$tdir/48x48/apps" "$tdir/128x128/apps" "$tdir/256x256/apps" "$tdir/apps" "$tdir"/*/apps "$tdir"/base/*/apps; do '
+            + '      if [ -d "$appdir" ]; then '
+            + '        cp -asf "$appdir"/* "$DEST/apps/" 2>/dev/null && break 2; '
             + '      fi; '
             + '    done; '
-            + '  done; '
-            + '  if [ -d "/usr/share/icons/Yaru/256x256/apps" ] && [[ "$THEME" == Yaru* ]]; then '
-            + '    find -L /usr/share/icons/Yaru/256x256/apps -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
-            + '  elif [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
-            + '    find -L /usr/share/icons/Yaru/scalable/apps -maxdepth 1 \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf {} "$DEST/apps/" \\; 2>/dev/null || true; '
             + '  fi; '
-            + 'done'
+            + 'done; '
+            + 'if [ -d "/usr/share/icons/Yaru/scalable/apps" ] && [[ "$THEME" == Yaru* ]]; then '
+            + '  cp -asf /usr/share/icons/Yaru/scalable/apps/* "$DEST/apps/" 2>/dev/null || true; '
+            + 'fi'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
@@ -299,10 +286,8 @@ Panel {
             root.applying = false
             root.applyingThemeName = ""
             if (exitCode === 0) {
-                root.statusMessage = "Theme applied!"
-                if (root.bar && root.bar.shell && root.bar.shell.appLibrary && typeof root.bar.shell.appLibrary.refreshIcons === "function") {
-                    root.bar.shell.appLibrary.refreshIcons()
-                }
+                root.statusMessage = "Theme applied! Reloading…"
+                restartShellTimer.restart()
             } else {
                 root.statusMessage = "Apply failed"
                 root.scanCurrentTheme()
@@ -310,6 +295,14 @@ Panel {
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: applyStdout; waitForEnd: true }
+    }
+
+    property Timer restartShellTimer: Timer {
+        interval: 500
+        repeat: false
+        onTriggered: {
+            Quickshell.execDetached(["bash", "-c", "rm -rf \"$HOME/.cache/quickshell/qmlcache\" \"$HOME/.cache/quickshell\"/qtpipelinecache-*; omarchy-restart-shell"])
+        }
     }
 
     property Process installProcess: Process {

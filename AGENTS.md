@@ -10,7 +10,7 @@ This document is the primary reference for AI coding agents working on the **`om
 * **Type:** Omarchy `bar-widget` plugin
 * **Target Desktop:** Omarchy (Arch Linux + Hyprland + Quickshell)
 * **Location:** `~/.config/omarchy/plugins/icons` (symlinked from `~/Projects/omarchy-icons`)
-* **Purpose:** Allows users to browse, install (via pacman), and apply GTK icon themes directly from the top status bar.
+* **Purpose:** Allows users to browse, install (via pacman), and apply GTK/Qt/KDE icon themes directly from the top status bar.
 
 ---
 
@@ -29,35 +29,40 @@ omarchy-icons/
 
 ---
 
-## 3. Architecture & Icon Subsystem Details
+## 3. Architecture & Universal Desktop Synchronization
 
-### The 5-Point Theme Synchronization
-When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` runs a fast shell script that synchronizes the theme across all subsystem layers:
+### The 7-Point Theme Synchronization
+When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` runs an instant shell script that synchronizes the theme across all subsystem layers:
 
 1. **GNOME / Wayland Settings:**
    ```bash
    gsettings set org.gnome.desktop.interface icon-theme "$THEME"
    ```
-2. **GTK3 & GTK4 Settings:**
+2. **GTK 3 & GTK 4 Settings:**
    Writes `[Settings]\ngtk-icon-theme-name=$THEME` into:
    - `~/.config/gtk-3.0/settings.ini`
    - `~/.config/gtk-4.0/settings.ini`
-3. **Freedesktop / Qt Default Theme Inheritance:**
+3. **KDE Plasma & Dolphin:**
+   Writes `[Icons] Theme=$THEME` into `~/.config/kdeglobals` via `kwriteconfig6` (or `kwriteconfig5` / `sed`).
+4. **Qt Standalone (qt5ct & qt6ct):**
+   Updates `icon_theme=$THEME` in `~/.config/qt5ct/qt5ct.conf` and `~/.config/qt6ct/qt6ct.conf`.
+5. **Freedesktop / Qt Default Theme Inheritance:**
    Writes `[Icon Theme]\nInherits=$THEME` into:
    - `~/.icons/default/index.theme`
-4. **Omarchy Menu (`AppLibrary`) & Dock Priority Bridge:**
-   Omarchy's `AppLibrary.qml` and the Dock scan `$HOME/.icons` and `$HOME/.local/share/icons`. Placing a clean shadow link directory in `~/.local/share/icons/0-active-theme/apps/` and `~/.icons/0-active-theme/apps/` guarantees that both the Omarchy launcher (`Super` → **Apps** / Search) and Dock immediately display the active theme's icons ahead of any other icon sets (e.g. Zafiro).
-5. **Omarchy Desktop Theme Hook:**
+6. **Omarchy Launcher & Dock Shadow Priority Layer:**
+   Omarchy's `AppLibrary.qml` scans `$HOME/.local/share/icons` *before* `/usr/share/icons`.
+   The script builds `~/.local/share/icons/0-active-theme/apps/` using a two-tier strategy:
+   - **Baseline Layer:** Wraps all native application icons from `/usr/share/pixmaps/*.png` into vector SVGs with embedded high-res images, and links `/usr/share/icons/hicolor/*/apps/*`. This ensures apps without theme-specific icons (like Antigravity) always display their official high-res logo rather than small fallbacks from other themes.
+   - **Theme Overlay:** Fast native directory linking (`cp -asf "$appdir"/* "$DEST/apps/"`) of the active theme's vector app icons over the baseline.
+7. **Omarchy Desktop Theme Hook:**
    Writes `$THEME` to `~/.local/state/omarchy/current/theme/icons.theme` if present.
 
-### Shell Reload & Icon Refresh on Apply
-Upon exit code 0 of `applyProcess`, the plugin:
-1. Calls `root.bar.shell.appLibrary.refreshIcons()` to re-index application icons.
-2. Triggers a shell reload timer:
-   ```bash
-   rm -rf "$HOME/.cache/quickshell/qmlcache" "$HOME/.cache/quickshell"/qtpipelinecache-*
-   omarchy-restart-shell
-   ```
+### Shell Reload on Apply
+Upon exit code 0 of `applyProcess`, a timer triggers:
+```bash
+rm -rf "$HOME/.cache/quickshell/qmlcache" "$HOME/.cache/quickshell"/qtpipelinecache-*
+omarchy-restart-shell
+```
 
 ---
 
