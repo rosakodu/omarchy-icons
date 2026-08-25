@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "icons",
+  "name": "Icon Theme Switcher",
+  "version": "1.0.0",
+  "author": "community",
+  "license": "MIT",
+  "description": "Browse, download, and apply GTK icon themes on Omarchy",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Icon Themes",
+    "description": "Switch icon themes for GTK applications",
+    "category": "Appearance",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
