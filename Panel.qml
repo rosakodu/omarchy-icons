@@ -51,6 +51,7 @@ Panel {
     property string applyingThemeName: ""
     property string statusMessage: ""
     property string operatingPackage: ""
+    property string pendingApplyTheme: ""
     property string searchText: ""
 
     // ------------------------------------------------------------------ helpers
@@ -228,7 +229,9 @@ Panel {
             + 'done; '
             + 'for hbase in /usr/share/icons/hicolor "$HOME/.local/share/icons/hicolor"; do '
             + '  if [ -d "$hbase" ]; then '
-            + '    find "$hbase" ! -type d \( -name "*.svg" -o -name "*.png" \) \( -path "*/apps/*" -o -path "*/applications/*" \) -exec cp -asf -t "$NEW_DIR/apps/" {} + 2>/dev/null || true; '
+            + '    for d in $(find "$hbase" -type d -name "apps" 2>/dev/null | sort -V); do '
+            + '      find "$d" -maxdepth 1 ! -type d \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf -t "$NEW_DIR/apps/" {} + 2>/dev/null || true; '
+            + '    done; '
             + '  fi; '
             + 'done; '
             + 'resolve_parents() { '
@@ -255,10 +258,8 @@ Panel {
             + 'link_dir_apps() { '
             + '  local src="$1"; '
             + '  [ ! -d "$src" ] && return; '
-            + '  local app_dirs; '
-            + '  app_dirs=$(find "$src" -type d \( -name "apps" -o -name "applications" -o -name "scalable" \) 2>/dev/null | grep -E "(scalable|512|256|128|64|48|apps|applications)$" | sort -V); '
-            + '  for d in $app_dirs; do '
-            + '    cp -asf "$d"/* "$NEW_DIR/apps/" 2>/dev/null || true; '
+            + '  for d in $(find "$src" -type d \\( -name "apps" -o -name "applications" -o -path "*/apps/*" -o -path "*/applications/*" \\) 2>/dev/null | grep -v "symbolic" | sort -V); do '
+            + '    find "$d" -maxdepth 1 ! -type d \\( -name "*.svg" -o -name "*.png" \\) -exec cp -asf -t "$NEW_DIR/apps/" {} + 2>/dev/null || true; '
             + '  done; '
             + '}; '
             + 'PARENT_LIST=$(resolve_parents "$THEME" 2>/dev/null | tac | awk "!seen[$0]++" | tac); '
@@ -270,7 +271,7 @@ Panel {
             + 'for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
             + '  link_dir_apps "$b/$THEME"; '
             + 'done; '
-            + 'find "$NEW_DIR/apps" -mindepth 1 -type d -delete 2>/dev/null || true; '
+            + 'for sub in "$NEW_DIR/apps"/*; do [ -d "$sub" ] && rm -rf "$sub" 2>/dev/null || true; done; '
             + 'rm -f "$NEW_DIR/apps/"*-symbolic.* "$NEW_DIR/apps/"*symbolic-spot.* 2>/dev/null || true; '
             + 'make_alias() { '
             + '  local r="$1"; local a="$2"; '
@@ -502,7 +503,13 @@ Panel {
             if (exitCode === 0) {
                 root.statusMessage = "Installed successfully"
                 root.refreshAll()
+                if (root.pendingApplyTheme !== "") {
+                    var pending = root.pendingApplyTheme
+                    root.pendingApplyTheme = ""
+                    root.applyTheme(pending)
+                }
             } else {
+                root.pendingApplyTheme = ""
                 var err = String(installStderr.text || installStdout.text || "Install failed").trim().split("\n")[0]
                 root.statusMessage = err.length > 0 ? err : "Install failed"
             }
@@ -730,8 +737,8 @@ Panel {
                                         if (themeInstalled || groupDelegate.pkgInstalled || groupDelegate.group.package === null) {
                                             root.applyTheme(variant.theme)
                                         } else {
-                                            root.statusMessage = "Please install " + groupDelegate.group.name + " first"
-                                            statusClearTimer.restart()
+                                            root.pendingApplyTheme = variant.theme
+                                            root.installPackage(groupDelegate.group.package)
                                         }
                                     }
                                 }
