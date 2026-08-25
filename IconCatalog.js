@@ -52,8 +52,7 @@ var catalog = [
         package: "pop-icon-theme",
         description: "System76 Pop!_OS official icon theme",
         variants: [
-            { name: "Pop",      theme: "Pop",      mode: "light" },
-            { name: "Pop Dark", theme: "Pop-dark",  mode: "dark" }
+            { name: "Pop", theme: "Pop", mode: "auto" }
         ]
     },
     {
