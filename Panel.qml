@@ -170,12 +170,12 @@ Panel {
     }
 
     function applyTheme(themeName) {
-        if (root.applying) return
         if (!/^[A-Za-z0-9_-]+$/.test(themeName)) {
             root.statusMessage = "Invalid theme name"
             statusClearTimer.restart()
             return
         }
+        root.currentTheme = themeName
         root.applying = true
         root.statusMessage = "Applying " + themeName + "…"
         var script = 'THEME="$0"; '
@@ -234,8 +234,12 @@ Panel {
 
     property Process currentThemeProcess: Process {
         onExited: function(exitCode) {
-            var out = String(currentThemeStdout.text || "").trim().replace(/^'|'$/g, "")
-            if (exitCode === 0 && out !== "") root.currentTheme = out
+            var raw = String(currentThemeStdout.text || "").trim()
+            if (exitCode === 0 && raw !== "") {
+                var lines = raw.split("\n")
+                var lastLine = lines[lines.length - 1].trim().replace(/^'|'$/g, "")
+                if (lastLine !== "") root.currentTheme = lastLine
+            }
         }
         stdout: StdioCollector { id: currentThemeStdout; waitForEnd: true }
     }
@@ -280,9 +284,9 @@ Panel {
             root.applying = false
             if (exitCode === 0) {
                 root.statusMessage = "Theme applied"
-                root.scanCurrentTheme()
             } else {
                 root.statusMessage = "Apply failed"
+                root.scanCurrentTheme()
             }
             statusClearTimer.restart()
         }
@@ -326,6 +330,8 @@ Panel {
     }
 
     // ------------------------------------------------------------------ lifecycle
+
+    Component.onCompleted: root.refreshAll()
 
     onOpenedChanged: {
         if (opened) root.refreshAll()
@@ -516,10 +522,12 @@ Panel {
 
                                     onClicked: {
                                         if (themeActive) return
-                                        if (themeInstalled || groupDelegate.pkgInstalled)
+                                        if (themeInstalled || groupDelegate.pkgInstalled || groupDelegate.group.package === null) {
                                             root.applyTheme(variant.theme)
-                                        else
-                                            root.statusMessage = "Install the package first"
+                                        } else {
+                                            root.statusMessage = "Please install " + groupDelegate.group.name + " first"
+                                            statusClearTimer.restart()
+                                        }
                                     }
 
                                     // Mode badge
