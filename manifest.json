@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "icons",
   "name": "Icon Theme Switcher",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": "rosakodu",
   "license": "MIT",
   "description": "Browse, download, and apply GTK icon themes on Omarchy",
