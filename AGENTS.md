@@ -57,10 +57,12 @@ When the user clicks a theme variant in `Panel.qml`, `applyTheme(themeName)` run
 7. **Omarchy Desktop Theme Hook:**
    Writes `$THEME` to `~/.local/state/omarchy/current/theme/icons.theme` if present.
 
-### Instant Dynamic Refresh on Apply
-Upon exit code 0 of `applyProcess`, the plugin:
-1. Calls `root.bar.shell.appLibrary.refreshIcons()` to re-index application icons dynamically across the Omarchy Menu and Dock.
-2. Updates UI status to `"Theme applied!"` without restarting or flickering the shell.
+### Shell Reload on Apply
+Upon exit code 0 of `applyProcess`, a timer triggers:
+```bash
+rm -rf "$HOME/.cache/quickshell/qmlcache" "$HOME/.cache/quickshell"/qtpipelinecache-*
+omarchy-restart-shell
+```
 
 ---
 
