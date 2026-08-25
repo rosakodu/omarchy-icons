@@ -63,12 +63,13 @@ BarWidget {
         id: button
         anchors.fill: parent
         bar: root.bar
-        // Nerd Font icon: nf-md-palette_outline (palette/theme icon)
-        text: root.opened ? "\udb84\ude4b" : "\udb84\ude4b"
+        text: "\udb84\ude4b"
         tooltipText: root.opened ? "Close Icon Themes" : "Icon Themes"
 
         onPressed: function(b) {
+            console.log("icons BarIconButton pressed b=", b, "panelItem=", root.panelItem, "opened=", root.opened)
             if (b === Qt.LeftButton) root.togglePanel()
         }
     }
 }
+
