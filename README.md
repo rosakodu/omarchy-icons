@@ -12,7 +12,7 @@ A modern, highly polished, and fully native icon theme manager and status bar wi
 - 🌈 **Extensive Color Variant Selection** — Easily expand theme families to explore and select specialized colorways (e.g. Tela Circle Dracula, Nord, Manjaro, Ubuntu, Blue, Red, Green, etc.).
 - 🔍 **Real-Time Instant Search** — Quickly filter through theme names, variant styles, and descriptions as you type.
 - 🎛️ **Native Top Bar Widget (`BarWidget`)** — Sleek status bar launcher displaying a crisp palette glyph (`🎨`), seamlessly matching your active Omarchy status bar styling and theme colors.
-- 🛡️ **Clean & Native System Integration** — Automatically keeps `gsettings`, `~/.config/gtk-3.0/settings.ini`, `~/.config/gtk-4.0/settings.ini`, `~/.icons/default/index.theme`, and `~/.local/state/omarchy/current/theme/icons.theme` synchronized without polluting the filesystem.
+- 🛡️ **Full GTK, Qt & KDE Dolphin Support** — Automatically keeps `gsettings`, GTK 3/4 `settings.ini`, KDE globals `~/.config/kdeglobals` (Dolphin), `qt5ct`/`qt6ct`, and Omarchy theme files synchronized in real time.
 - 🚀 **100% Quickshell Native** — Smooth animations, reactive property bindings, and lightweight resource footprint.
 
 ---
@@ -57,12 +57,12 @@ omarchy plugin add https://github.com/rosakodu/omarchy-icons.git --enable
 ## ⚙️ How It Works
 
 - **Package Management:** Downloads verified official packages using `pkexec pacman -S --noconfirm <package>`.
-- **System Sync:** Seamlessly writes the active theme name to:
-  - `gsettings set org.gnome.desktop.interface icon-theme "<theme>"`
-  - `~/.config/gtk-3.0/settings.ini`
-  - `~/.config/gtk-4.0/settings.ini`
-  - `~/.icons/default/index.theme`
-  - `~/.local/state/omarchy/current/theme/icons.theme`
+- **Universal Desktop Sync:** Seamlessly writes the active theme name to:
+  - **GNOME / GTK:** `gsettings set org.gnome.desktop.interface icon-theme "<theme>"`
+  - **GTK 3 & GTK 4:** `~/.config/gtk-3.0/settings.ini` and `~/.config/gtk-4.0/settings.ini`
+  - **KDE / Dolphin:** `~/.config/kdeglobals` (`[Icons] Theme=<theme>`) via `kwriteconfig6`
+  - **Qt Standalone:** `~/.config/qt5ct/qt5ct.conf` and `~/.config/qt6ct/qt6ct.conf`
+  - **XDG & Omarchy:** `~/.icons/default/index.theme` and `~/.local/state/omarchy/current/theme/icons.theme`
 - **Real-Time Discovery:** Scans installed themes directly from `/usr/share/icons/`, `~/.local/share/icons/`, and `~/.icons/`.
 
 ---
