@@ -255,7 +255,9 @@ Panel {
             + 'link_dir_apps() { '
             + '  local src="$1"; '
             + '  [ ! -d "$src" ] && return; '
-            + '  for d in $(find "$src" -type d \( -name "apps" -o -name "applications" -o -path "*/apps/*" -o -path "*/applications/*" \) 2>/dev/null | sort -V); do '
+            + '  local app_dirs; '
+            + '  app_dirs=$(find "$src" -type d \( -name "apps" -o -name "applications" -o -name "scalable" \) 2>/dev/null | grep -E "(scalable|512|256|128|64|48|apps|applications)$" | sort -V); '
+            + '  for d in $app_dirs; do '
             + '    cp -asf "$d"/* "$NEW_DIR/apps/" 2>/dev/null || true; '
             + '  done; '
             + '}; '
@@ -268,7 +270,7 @@ Panel {
             + 'for b in "$HOME/.local/share/icons" "/usr/share/icons" "$HOME/.icons"; do '
             + '  link_dir_apps "$b/$THEME"; '
             + 'done; '
-            + 'find "$NEW_DIR/apps" -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true; '
+            + 'find "$NEW_DIR/apps" -mindepth 1 -type d -delete 2>/dev/null || true; '
             + 'rm -f "$NEW_DIR/apps/"*-symbolic.* "$NEW_DIR/apps/"*symbolic-spot.* 2>/dev/null || true; '
             + 'make_alias() { '
             + '  local r="$1"; local a="$2"; '
@@ -319,7 +321,7 @@ Panel {
             + 'make_alias "ru.linux_gaming.PortProtonQt" "portproton"; '
             + 'make_alias "ru.linux_gaming.PortProtonQt" "PortProton"; '
             + 'make_alias "portproton" "ru.linux_gaming.PortProtonQt"; '
-            + 'for f in "$NEW_DIR/apps/"*; do [ ! -e "$f" ] && rm -f "$f" 2>/dev/null || true; done; '
+            + 'find "$NEW_DIR/apps" -xtype l -delete 2>/dev/null || true; '
             + 'rm -rf "$LINK.old" 2>/dev/null || true; '
             + 'if [ -d "$LINK" ] || [ -L "$LINK" ]; then mv "$LINK" "$LINK.old" 2>/dev/null || rm -rf "$LINK" 2>/dev/null || true; fi; '
             + 'mv "$NEW_DIR" "$LINK" 2>/dev/null || (mkdir -p "$LINK" && cp -a "$NEW_DIR"/* "$LINK"/ 2>/dev/null) || true; '
@@ -347,7 +349,8 @@ Panel {
             + '  if [ -f "$qfile" ]; then '
             + '    sed -i -E \'s/^icon_theme=.*/icon_theme=\'"$THEME"\'/\' "$qfile" 2>/dev/null || true; '
             + '  fi; '
-            + 'done'
+            + 'done; '
+            + 'exit 0'
         applyProcess.command = ["bash", "-c", script, themeName]
         applyProcess.running = true
     }
@@ -482,12 +485,14 @@ Panel {
                     appLib.refreshIcons()
                 }
             } else {
-                root.statusMessage = "Apply failed"
+                var err = String(applyStderr.text || applyStdout.text || "Apply failed").trim().split("\n")[0]
+                root.statusMessage = err.length > 0 ? err : "Apply failed"
                 root.scanCurrentTheme()
             }
             statusClearTimer.restart()
         }
         stdout: StdioCollector { id: applyStdout; waitForEnd: true }
+        stderr: StdioCollector { id: applyStderr; waitForEnd: true }
     }
 
     property Process installProcess: Process {
