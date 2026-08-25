@@ -398,7 +398,11 @@ Panel {
             root.currentTheme = "Adwaita"
         }
         var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
-            + 'pacman -Rns --noconfirm "$0" 2>&1 || pacman -R --noconfirm "$0" 2>&1'
+            + 'pkgs=("$0"); '
+            + 'if [ "$0" = "tela-circle-icon-theme-all" ]; then '
+            + '  for p in $(pacman -Qq 2>/dev/null | grep "^tela-circle-icon-theme"); do pkgs+=("$p"); done; '
+            + 'fi; '
+            + 'pacman -Rns --noconfirm "${pkgs[@]}" 2>&1 || pacman -Rs --noconfirm "${pkgs[@]}" 2>&1 || pacman -R --noconfirm "${pkgs[@]}" 2>&1'
         removeProcess.command = ["pkexec", "bash", "-c", cmd, packageName]
         removeProcess.running = true
     }
