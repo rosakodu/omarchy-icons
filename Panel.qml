@@ -369,8 +369,8 @@ Panel {
 
     function packageContainsCurrentTheme(packageName) {
         if (!packageName) return false
-        for (var i = 0; i < IconCatalog.catalog.length; i++) {
-            var item = IconCatalog.catalog[i]
+        for (var i = 0; i < Catalog.catalog.length; i++) {
+            var item = Catalog.catalog[i]
             if (item.package === packageName) {
                 if (item.variants) {
                     for (var v = 0; v < item.variants.length; v++) {
