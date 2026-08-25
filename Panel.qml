@@ -56,11 +56,57 @@ Panel {
     // ------------------------------------------------------------------ helpers
 
     readonly property var filteredCatalog: {
-        var q = root.searchText.trim().toLowerCase()
-        if (q === "") return Catalog.catalog
-        var result = []
+        var allGroups = []
         for (var i = 0; i < Catalog.catalog.length; i++) {
-            var group = Catalog.catalog[i]
+            allGroups.push(Catalog.catalog[i])
+        }
+
+        // Collect all theme identifiers defined in the catalog
+        var catalogThemeMap = {}
+        for (var c = 0; c < Catalog.catalog.length; c++) {
+            var grp = Catalog.catalog[c]
+            if (grp && grp.variants) {
+                for (var v = 0; v < grp.variants.length; v++) {
+                    catalogThemeMap[grp.variants[v].theme] = true
+                }
+            }
+        }
+
+        // Discover custom or locally installed themes on the user's system
+        var customVariants = []
+        var ignored = {
+            "default": true,
+            "hicolor": true,
+            "0-active-theme": true,
+            "locolor": true,
+            "HighContrast": true,
+            "AdwaitaLegacy": true
+        }
+
+        for (var t = 0; t < root.installedThemes.length; t++) {
+            var themeName = root.installedThemes[t]
+            if (!ignored[themeName] && !catalogThemeMap[themeName] && themeName.indexOf("0-active-theme") === -1) {
+                customVariants.push({
+                    name: themeName,
+                    theme: themeName
+                })
+            }
+        }
+
+        if (customVariants.length > 0) {
+            allGroups.push({
+                name: "Custom / Other Themes",
+                package: null,
+                description: "Locally installed icon themes detected on your system",
+                variants: customVariants
+            })
+        }
+
+        var q = root.searchText.trim().toLowerCase()
+        if (q === "") return allGroups
+        var result = []
+        for (var k = 0; k < allGroups.length; k++) {
+            var group = allGroups[k]
             if (String(group.name || "").toLowerCase().indexOf(q) !== -1 ||
                 String(group.description || "").toLowerCase().indexOf(q) !== -1) {
                 result.push(group)
@@ -68,12 +114,13 @@ Panel {
             }
             var matchedVariants = []
             for (var j = 0; j < group.variants.length; j++) {
-                if (String(group.variants[j].name || "").toLowerCase().indexOf(q) !== -1)
+                if (String(group.variants[j].name || "").toLowerCase().indexOf(q) !== -1 ||
+                    String(group.variants[j].theme || "").toLowerCase().indexOf(q) !== -1)
                     matchedVariants.push(group.variants[j])
             }
             if (matchedVariants.length > 0) {
                 var filtered = {}
-                for (var k in group) filtered[k] = group[k]
+                for (var key in group) filtered[key] = group[key]
                 filtered.variants = matchedVariants
                 result.push(filtered)
             }
