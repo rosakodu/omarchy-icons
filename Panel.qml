@@ -330,6 +330,10 @@ Panel {
             + 'make_alias "com.github.eneshecan.WhatsAppForLinux" "whatsapp"; '
             + 'make_alias "whatsapp-for-linux" "whatsapp"; '
             + 'make_alias "spotify-client" "spotify"; '
+            + 'make_alias "omarchy" "org.omarchy.about"; '
+            + 'make_alias "omarchy" "omarchy-about"; '
+            + 'make_alias "help-about" "org.omarchy.about"; '
+            + 'make_alias "help-about" "omarchy-about"; '
             + 'find "$NEW_DIR/apps" -xtype l -delete 2>/dev/null || true; '
             + 'rm -rf "$LINK.old" 2>/dev/null || true; '
             + 'if [ -d "$LINK" ] || [ -L "$LINK" ]; then mv "$LINK" "$LINK.old" 2>/dev/null || rm -rf "$LINK" 2>/dev/null || true; fi; '
@@ -369,8 +373,7 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = "Installing " + packageName + "…"
-        var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
-            + 'pacman -S --noconfirm --needed "$0" 2>&1'
+        var cmd = 'pacman -S --noconfirm --needed "$0" 2>&1'
         installProcess.command = ["pkexec", "bash", "-c", cmd, packageName]
         installProcess.running = true
     }
@@ -404,8 +407,7 @@ Panel {
         root.installing = true
         root.operatingPackage = packageName
         root.statusMessage = isCurrent ? "Removing " + packageName + " & switching theme…" : "Removing " + packageName + "…"
-        var cmd = 'if [ -f /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null; then rm -f /var/lib/pacman/db.lck 2>/dev/null || true; fi; '
-            + 'pkgs=("$0"); '
+        var cmd = 'pkgs=("$0"); '
             + 'if [ "$0" = "tela-circle-icon-theme-all" ]; then '
             + '  for p in $(pacman -Qq 2>/dev/null | grep "^tela-circle-icon-theme"); do pkgs+=("$p"); done; '
             + 'fi; '
